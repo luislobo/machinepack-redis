@@ -7,7 +7,7 @@ module.exports = {
   description: 'Flush the cache, removing all data from it.',
 
 
-  cacheable: true,
+  sideEffects: 'cacheable',
 
 
   inputs: {
@@ -36,14 +36,14 @@ module.exports = {
       description: 'Cache was successfully flushed.',
       outputVariableName: 'report',
       outputDescription: 'The return value is true when the cache was successfully flushed.',
-      example: true
+      outputExample: true
     },
 
     failed: {
       description: 'The cache encountered an error while attempting to flush the cache.',
       outputVariableName: 'report',
       outputDescription: 'The `error` property is a JavaScript Error instance explaining the exact error.  The `meta` property is reserved for custom driver-specific extensions.',
-      example: {
+      outputExample: {
         error: '===',
         meta: '==='
       }
@@ -52,30 +52,27 @@ module.exports = {
     badConnection: require('../constants/badConnection.exit')
 
   },
-  fn: function (inputs, exits) {
-    var isFunction = require('lodash.isfunction');
-    var isObject = require('lodash.isobject');
+  fn: async function (inputs, exits) {
+    var _ = require('@sailshq/lodash');
 
     // Ducktype provided "connection" (which is actually a redis client)
-    if (!isObject(inputs.connection) || !isFunction(inputs.connection.end) || !isFunction(inputs.connection.removeAllListeners)) {
+    if (!_.isObject(inputs.connection) || !_.isFunction(inputs.connection.quit) || !_.isFunction(inputs.connection.disconnect)) {
       return exits.badConnection();
     }
 
     // Provided `connection` is a redis client.
     var redisClient = inputs.connection;
 
-
-    redisClient.flushdb(function (err, result) {
-      if (err) {
-        return exits.failed(err);
-      }
+    try {
+      var result = await redisClient.flushDb();
 
       // Finally, call exits.success().
       // as per Redis docs, flushdb never fails and always return OK string
       // https://redis.io/commands/flushdb
       return exits.success(result === 'OK');
-
-    });
+    } catch (err) {
+      return exits.failed(err);
+    }
   }
 
 

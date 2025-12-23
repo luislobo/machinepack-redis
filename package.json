@@ -28,7 +28,7 @@
   "dependencies": {
     "@sailshq/lodash": "^3.10.4",
     "async": "^3.2.6",
-    "flaverr": "^1.14.2",
+    "flaverr": "^1.10.0",
     "machine": "^15.2.2",
     "redis": "^5.10.0"
   },
