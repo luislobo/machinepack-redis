@@ -76,11 +76,11 @@ module.exports = {
   },
   //
   //
-  fn: function (inputs, exits){
+  fn: async function (inputs, exits){
     var _ = require('@sailshq/lodash');
 
     // Ducktype provided "connection" (which is actually a redis client)
-    if (!_.isObject(inputs.connection) || !_.isFunction(inputs.connection.end) || !_.isFunction(inputs.connection.removeAllListeners)) {
+    if (!_.isObject(inputs.connection) || !_.isFunction(inputs.connection.quit) || !_.isFunction(inputs.connection.disconnect)) {
       return exits.badConnection();
     }
 
@@ -91,12 +91,12 @@ module.exports = {
     // Provided `connection` is a redis client.
     var redisClient = inputs.connection;
 
-    redisClient.del(inputs.keys, function (err){
-      if (err) {
-        return exits.failed({error: new Error('There was an error deleting the keys passed. Details: ' + err.stack)});
-      }
+    try {
+      await redisClient.del(inputs.keys);
       return exits.success();
-    });
+    } catch (err) {
+      return exits.failed({error: new Error('There was an error deleting the keys passed. Details: ' + err.stack)});
+    }
 
   }
 

@@ -72,11 +72,11 @@ module.exports = {
   },
   //
   //
-  fn: function (inputs, exits){
+  fn: async function (inputs, exits){
     var _ = require('@sailshq/lodash');
 
     // Ducktype provided "connection" (which is actually a redis client)
-    if (!_.isObject(inputs.connection) || !_.isFunction(inputs.connection.end) || !_.isFunction(inputs.connection.removeAllListeners)) {
+    if (!_.isObject(inputs.connection) || !_.isFunction(inputs.connection.quit) || !_.isFunction(inputs.connection.disconnect)) {
       return exits.badConnection();
     }
 
@@ -94,23 +94,18 @@ module.exports = {
     // but probably not a good idea right now.
     inputs.value = JSON.stringify(inputs.value);
 
-    // If a TTL is set and its greater than zero, use SETEX as it is atomic
-    // and is the equivalent of:
-    // * SET mykey value
-    // * EXPIRE mykey seconds
+    // If a TTL is set and its greater than zero, use SETEX (set with expiration)
     // http://redis.io/commands/setex
-    (function (proceed){
+    try {
       if (inputs.ttl > 0) {
-        redisClient.setex(inputs.key, inputs.ttl, inputs.value, proceed);
+        await redisClient.setEx(inputs.key, inputs.ttl, inputs.value);
       } else {
-        redisClient.set(inputs.key, inputs.value, proceed);
-      }
-    })(function afterSetOrSetEx(err){
-      if (err) {
-        return exits.error(err);
+        await redisClient.set(inputs.key, inputs.value);
       }
       return exits.success();
-    });//</self-calling function>
+    } catch (err) {
+      return exits.error(err);
+    }
 
   }
 };

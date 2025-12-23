@@ -61,7 +61,7 @@ module.exports = [
       'no-trailing-spaces': 'error',
       'no-undef': 'error',
       'no-unexpected-multiline': 'warn',
-      'no-unused-vars': 'error',
+      'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
       'one-var': ['error', 'never'],
       'semi': ['warn', 'always']
     }

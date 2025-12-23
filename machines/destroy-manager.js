@@ -59,29 +59,36 @@ module.exports = {
   },
   //
   //
-  fn: function (inputs, exits){
+  fn: async function (inputs, exits){
     var Pack = require('../');
-    var async = require('async');
 
     // First back up redisClients array, so we're not mutating it as we iterate over each one.
     // (since releaseConnection() removes items from the array)
     var _redisClients = [].concat(inputs.manager.redisClients);
 
     // Now call releaseConnection() on each redis client under management.
-    async.each(_redisClients, function _eachRedisClient (redisClient, next){
-      Pack.releaseConnection({
-        connection: redisClient
-      }).exec(next);
-    }, function afterwards (err){
-      if (err) {
-        return exits.failed({
-          error: new Error('Failed to destroy the Redis manager and/or gracefully end all connections under management.  Details:\n=== === ===\n' + err.stack)
+    try {
+      for (var i = 0; i < _redisClients.length; i++) {
+        var redisClient = _redisClients[i];
+        await new Promise((resolve, reject) => {
+          Pack.releaseConnection({
+            connection: redisClient
+          }).exec((err) => {
+            if (err) {
+              return reject(err);
+            }
+            resolve();
+          });
         });
       }
 
       // All redis clients under management have been annihilated.
       return exits.success();
-    });
+    } catch (err) {
+      return exits.failed({
+        error: new Error('Failed to destroy the Redis manager and/or gracefully end all connections under management.  Details:\n=== === ===\n' + err.stack)
+      });
+    }
   }
 
 

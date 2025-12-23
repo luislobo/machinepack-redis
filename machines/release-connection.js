@@ -52,11 +52,11 @@ module.exports = {
   },
 
 
-  fn: function (inputs, exits) {
+  fn: async function (inputs, exits) {
     var _ = require('@sailshq/lodash');
 
     // Validate provided connection (which is actually a redis client)
-    if ( !_.isObject(inputs.connection) || !_.isFunction(inputs.connection.end) || !_.isFunction(inputs.connection.removeAllListeners) ) {
+    if ( !_.isObject(inputs.connection) || !_.isFunction(inputs.connection.quit) || !_.isFunction(inputs.connection.disconnect) ) {
       return exits.badConnection();
     }
 
@@ -65,16 +65,17 @@ module.exports = {
 
     // Release connection.
     try {
-      inputs.connection.end(true);
-
-      // If necessary, we could also do the following here:
-      // inputs.connection.removeAllListeners();
-      //
-      // (but not doing that unless absolutely necessary because it could cause crashing
-      //  of the process if our `redis` dep decides to emit any surprise "error" events.)
+      // Use quit() for graceful shutdown in redis v5
+      // This sends QUIT command and waits for pending commands to complete
+      await inputs.connection.quit();
     }
-    catch (e) {
-      return exits.error(e);
+    catch (_quitErr) {
+      // If quit fails, try forceful disconnect
+      try {
+        await inputs.connection.disconnect();
+      } catch (disconnectErr) {
+        return exits.error(disconnectErr);
+      }
     }
 
     // Remove this redis client from the manager.
