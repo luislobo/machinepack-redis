@@ -94,7 +94,7 @@ module.exports = {
     //
     // For a complete list of available options, see:
     //  • https://github.com/redis/node-redis#client-configuration
-    var redisClientOptions = _.extend({}, inputs.manager.meta || {});
+    var redisClientOptions = Object.assign({}, inputs.manager.meta || {});
 
     // Parse connection string and merge with options
     // The new redis client accepts a URL directly
@@ -103,15 +103,15 @@ module.exports = {
     // Create Redis client with the connection URL
     var client;
     try {
-      client = redis.createClient({
-        url: connectionUrl,
-        ...redisClientOptions,
-        // Set socket timeout based on input
-        socket: {
-          ...(redisClientOptions.socket || {}),
-          connectTimeout: inputs.timeout
-        }
-      });
+      var socketOptions = Object.assign({
+        connectTimeout: inputs.timeout
+      }, redisClientOptions.socket || {});
+
+      client = redis.createClient(Object.assign({
+        url: connectionUrl
+      }, redisClientOptions, {
+        socket: socketOptions
+      }));
     } catch (e) {
       // If a "TypeError" was thrown, it means something was wrong with
       // one of the provided client options.  We assume the issue was with

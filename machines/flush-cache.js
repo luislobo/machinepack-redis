@@ -7,7 +7,7 @@ module.exports = {
   description: 'Flush the cache, removing all data from it.',
 
 
-  sideEffects: 'cacheable',
+  sideEffects: 'idempotent',
 
 
   inputs: {
