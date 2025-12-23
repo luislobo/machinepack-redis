@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  # Standard Redis server for basic tests
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis with authentication
+  redis-auth:
+    image: redis:7-alpine
+    command: redis-server --requirepass testpassword
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "testpassword", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Sentinel setup
+  redis-sentinel-master:
+    image: redis:7-alpine
+    ports:
+      - "6381:6379"
+    command: redis-server --port 6379
+
+  redis-sentinel-replica:
+    image: redis:7-alpine
+    ports:
+      - "6382:6379"
+    command: redis-server --port 6379 --replicaof redis-sentinel-master 6379
+    depends_on:
+      - redis-sentinel-master
+
+  redis-sentinel-1:
+    image: redis:7-alpine
+    ports:
+      - "26379:26379"
+    command: >
+      sh -c "
+      echo 'port 26379' > /tmp/sentinel.conf &&
+      echo 'sentinel monitor mymaster redis-sentinel-master 6379 2' >> /tmp/sentinel.conf &&
+      echo 'sentinel down-after-milliseconds mymaster 5000' >> /tmp/sentinel.conf &&
+      echo 'sentinel parallel-syncs mymaster 1' >> /tmp/sentinel.conf &&
+      echo 'sentinel failover-timeout mymaster 10000' >> /tmp/sentinel.conf &&
+      redis-server /tmp/sentinel.conf --sentinel
+      "
+    depends_on:
+      - redis-sentinel-master
+      - redis-sentinel-replica
+
+  redis-sentinel-2:
+    image: redis:7-alpine
+    ports:
+      - "26380:26379"
+    command: >
+      sh -c "
+      echo 'port 26379' > /tmp/sentinel.conf &&
+      echo 'sentinel monitor mymaster redis-sentinel-master 6379 2' >> /tmp/sentinel.conf &&
+      echo 'sentinel down-after-milliseconds mymaster 5000' >> /tmp/sentinel.conf &&
+      echo 'sentinel parallel-syncs mymaster 1' >> /tmp/sentinel.conf &&
+      echo 'sentinel failover-timeout mymaster 10000' >> /tmp/sentinel.conf &&
+      redis-server /tmp/sentinel.conf --sentinel
+      "
+    depends_on:
+      - redis-sentinel-master
+      - redis-sentinel-replica
+
+  redis-sentinel-3:
+    image: redis:7-alpine
+    ports:
+      - "26381:26379"
+    command: >
+      sh -c "
+      echo 'port 26379' > /tmp/sentinel.conf &&
+      echo 'sentinel monitor mymaster redis-sentinel-master 6379 2' >> /tmp/sentinel.conf &&
+      echo 'sentinel down-after-milliseconds mymaster 5000' >> /tmp/sentinel.conf &&
+      echo 'sentinel parallel-syncs mymaster 1' >> /tmp/sentinel.conf &&
+      echo 'sentinel failover-timeout mymaster 10000' >> /tmp/sentinel.conf &&
+      redis-server /tmp/sentinel.conf --sentinel
+      "
+    depends_on:
+      - redis-sentinel-master
+      - redis-sentinel-replica
+
+  # Redis Cluster nodes
+  redis-cluster-1:
+    image: redis:7-alpine
+    ports:
+      - "7000:6379"
+      - "17000:16379"
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+
+  redis-cluster-2:
+    image: redis:7-alpine
+    ports:
+      - "7001:6379"
+      - "17001:16379"
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+
+  redis-cluster-3:
+    image: redis:7-alpine
+    ports:
+      - "7002:6379"
+      - "17002:16379"
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+
+  redis-cluster-4:
+    image: redis:7-alpine
+    ports:
+      - "7003:6379"
+      - "17003:16379"
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+
+  redis-cluster-5:
+    image: redis:7-alpine
+    ports:
+      - "7004:6379"
+      - "17004:16379"
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+
+  redis-cluster-6:
+    image: redis:7-alpine
+    ports:
+      - "7005:6379"
+      - "17005:16379"
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+
+  # Initialize the cluster (run once)
+  redis-cluster-init:
+    image: redis:7-alpine
+    depends_on:
+      - redis-cluster-1
+      - redis-cluster-2
+      - redis-cluster-3
+      - redis-cluster-4
+      - redis-cluster-5
+      - redis-cluster-6
+    command: >
+      sh -c "
+      sleep 5 &&
+      redis-cli --cluster create
+      redis-cluster-1:6379
+      redis-cluster-2:6379
+      redis-cluster-3:6379
+      redis-cluster-4:6379
+      redis-cluster-5:6379
+      redis-cluster-6:6379
+      --cluster-replicas 1 --cluster-yes
+      "

@@ -64,28 +64,25 @@ module.exports = {
   },
 
 
-  fn: function (inputs, exits){
+  fn: async function (inputs, exits){
     var _ = require('@sailshq/lodash');
 
     // Ducktype provided "connection" (which is actually a redis client)
-    if (!_.isObject(inputs.connection) || !_.isFunction(inputs.connection.end) || !_.isFunction(inputs.connection.removeAllListeners)) {
+    if (!_.isObject(inputs.connection) || !_.isFunction(inputs.connection.quit) || !_.isFunction(inputs.connection.disconnect)) {
       return exits.badConnection();
     }
 
     // Provided `connection` is a redis client.
     /**
-     * redisClient red
+     * redisClient
      */
     var redisClient = inputs.connection;
 
 
-    redisClient.get(inputs.key, function (err, foundValue) {
-      if (err) {
-        return exits.error(err);
-      }
+    try {
+      var foundValue = await redisClient.get(inputs.key);
 
-      // If the value is null, before parsing JSON,
-      // the value was not found in Redis
+      // If the value is null, the value was not found in Redis
       if (foundValue === null) {
         return exits.notFound();
       }
@@ -95,8 +92,6 @@ module.exports = {
       try {
         foundValue = JSON.parse(foundValue);
       }
-        //// Since we're in a callback, we need to use a try/catch to prevent
-        // throwing an uncaught exception and crashing the process.
       catch (e) {
         return exits.error(e);
       }
@@ -106,7 +101,9 @@ module.exports = {
         value: foundValue
       });
 
-    });
+    } catch (err) {
+      return exits.error(err);
+    }
   }
 
 };

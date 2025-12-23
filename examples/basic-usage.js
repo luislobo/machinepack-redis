@@ -28,7 +28,7 @@ function doSomeStuffWithRedis(opts, done) {
   if (opts.onUnexpectedFailure !== undefined & typeof opts.onUnexpectedFailure !== 'function') {
     return done(new Error('If provided, `onUnexpectedFailure` must be a function.'));
   }
-  
+
   Redis.createManager({
     connectionString: opts.connectionString,
     onUnexpectedFailure: function (err){
@@ -44,7 +44,7 @@ function doSomeStuffWithRedis(opts, done) {
     if (err) {
       return done(new Error('Could not create manager due to unexpected error: '+ err.stack));
     }//--• No reason to proceed any further.
-    
+
     var mgr = report.manager;
     Redis.getConnection({
       manager: mgr
@@ -52,13 +52,13 @@ function doSomeStuffWithRedis(opts, done) {
       if (err) {
         return done(new Error('Could not get connection from manager, due to unexpected error: '+err.stack));
       }//--• No reason to proceed any further.
-      
+
       // Local var for convenience.
       var connection = report.connection;
-      
-      
+
+
       console.log('CONNECTED!');
-      
+
       // Now do stuff w/ the connection
       (opts.during||function noOp(connection, proceed){
         return proceed();
@@ -67,7 +67,7 @@ function doSomeStuffWithRedis(opts, done) {
           console.log('Unexpected error occurred while doing stuff with this Redis connection.  Details: '+err_doingStuff.stack);
           console.log('Nonetheless, continuing on to release the connection and destroy the manager....');
         }// >- continue on to attempt to release the connection and destroy the manager.
-        
+
         // Always release the connection when finished:
         Redis.releaseConnection({
           connection: connection
@@ -76,7 +76,7 @@ function doSomeStuffWithRedis(opts, done) {
             console.warn(new Error('Could not release Redis connection due to unexpected error: '+err_releaseConnection.stack));
             // ^^Note that we might want to also still attempt to destroy the manager here, even
             // though we couldn't release the connection. (However, we don't mess w/ that in this example code.)
-            
+
             if (err_doingStuff) { return done(err_doingStuff); }
             else {
               console.warn('Triggering success callback anyway, since everything else seemed to work ok...');
@@ -85,21 +85,21 @@ function doSomeStuffWithRedis(opts, done) {
           },
           success: function (report){
             console.log('Connection released.');
-  
+
             // But ALWAYS destroy the connection manager when finished
             Redis.destroyManager({manager: mgr}).exec(function (err_destroyMgr){
               if (err_destroyMgr) {
                 console.warn(new Error('Could not destroy Redis connection manager due to unexpected error: '+ err_destroyMgr.stack));
-                
+
                 if (err_doingStuff) { return done(err_doingStuff); }
                 else {
                   console.warn('Triggering success callback anyway, since everything else seemed to work ok...');
                   return done();
                 }
               }//--•
-              
+
               console.log('Manager destroyed.');
-              
+
               // Now, depending on whether we ran into an error above, finish up accordingly.
               if (err_doingStuff) {
                 // Encountered an error along the way, but at least cleanup worked out ok!
@@ -109,9 +109,9 @@ function doSomeStuffWithRedis(opts, done) {
                 // Done.  No errors, and we cleaned up everything successfully!
                 return done();
               }
-              
+
             }); //</Redis.destroyManager>
-  
+
           }//</on success :: Redis.releaseConnection()>
         });//</Redis.releaseConnection()>
       });//</during (do stuff while redis connection is active)>
@@ -122,11 +122,11 @@ function doSomeStuffWithRedis(opts, done) {
 
 // Then e.g. you can do:
 doSomeStuffWithRedis({
-  // [redis:]//[[user][:password]@][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]] 
+  // [redis:]//[[user][:password]@][host][:port][/db-number][?db=db-number[&password=bar[&option=value]]]
   connectionString: 'redis://127.0.0.1:6379/14', // 14 is the selected redis database
   onUnexpectedFailure: function (err){ console.warn('uh oh, looks like our redis might have just gone down:',err); },
   during: function (connection, proceed) {
-    
+
     // Storing in key `stuff` value `things`
     Redis.cacheValue({
       connection: connection,
@@ -182,13 +182,13 @@ doSomeStuffWithRedis({
       }); //</Redis.getCachedValue>
     }); //</Redis.cacheValue>
   }//</during>
-  
+
 }, function afterwards(err) {
   if (err) {
     console.log('Attempted to do some stuff with redis, but encountered an error along the way:',err.stack);
     return;
   }//--•
-  
+
   console.log('Successfully did some stuff with Redis!');
 });
 
