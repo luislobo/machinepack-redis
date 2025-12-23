@@ -2,16 +2,16 @@ module.exports = {
 //
 //
   friendlyName: 'Destroy manager',
-//
-//
+  //
+  //
   description: 'Destroy the specified connection manager and destroy all of its active connections.',
 
 
   sideEffects: 'idempotent',
-//
-//
+  //
+  //
   inputs: {
-//
+    //
     manager: {
       friendlyName: 'Manager',
       description: 'The connection manager instance to destroy.',
@@ -19,19 +19,19 @@ module.exports = {
       example: '===',
       required: true
     },
-//
+    //
     meta: {
       friendlyName: 'Meta (custom)',
       description: 'Additional stuff to pass to the driver.',
       extendedDescription: 'This is reserved for custom driver-specific extensions.  Please refer to the documentation for the driver you are using for more specific information.',
       example: '==='
     }
-//
+    //
   },
-//
-//
+  //
+  //
   exits: {
-//
+    //
     success: {
       description: 'The specified manager and all of its active connections were successfully destroyed.',
       outputFriendlyName: 'Report',
@@ -40,7 +40,7 @@ module.exports = {
         meta: '==='
       }
     },
-//
+    //
     failed: {
       friendlyName: 'Failed',
       description: 'Could not destroy the provided connection manager.',
@@ -55,10 +55,10 @@ module.exports = {
         meta: '==='
       }
     }
-//
+    //
   },
-//
-//
+  //
+  //
   fn: function (inputs, exits){
     var Pack = require('../');
     var async = require('async');

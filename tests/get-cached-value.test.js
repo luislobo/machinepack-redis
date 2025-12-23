@@ -21,13 +21,13 @@ describe('getCachedValue()', function (){
   // The keys to use during tests.
   var keysUsed = ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8'];
 
-  //                                               _   _             
-  //                                              | | (_)            
-  // _ __   ___     ___ ___  _ __  _ __   ___  ___| |_ _  ___  _ __  
-  //| '_ \ / _ \   / __/ _ \| '_ \| '_ \ / _ \/ __| __| |/ _ \| '_ \ 
+  //                                               _   _
+  //                                              | | (_)
+  // _ __   ___     ___ ___  _ __  _ __   ___  ___| |_ _  ___  _ __
+  //| '_ \ / _ \   / __/ _ \| '_ \| '_ \ / _ \/ __| __| |/ _ \| '_ \
   //| | | | (_) | | (_| (_) | | | | | | |  __/ (__| |_| | (_) | | | |
   //|_| |_|\___/   \___\___/|_| |_|_| |_|\___|\___|\__|_|\___/|_| |_|
-  //                                                                 
+  //
   describe('with no connection', function (){
     it('should fail', function (done){
       Pack.getCachedValue({

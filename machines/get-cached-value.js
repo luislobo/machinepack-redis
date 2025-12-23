@@ -95,8 +95,8 @@ module.exports = {
       try {
         foundValue = JSON.parse(foundValue);
       }
-        //// Since we're in a callback, we need to use a try/catch to prevent
-        // throwing an uncaught exception and crashing the process.
+      //// Since we're in a callback, we need to use a try/catch to prevent
+      // throwing an uncaught exception and crashing the process.
       catch (e) {
         return exits.error(e);
       }

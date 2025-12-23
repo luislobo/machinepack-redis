@@ -2,13 +2,13 @@ module.exports = {
 //
 //
   friendlyName: 'Get connection',
-//
-//
+  //
+  //
   description: 'Get an active connection to Redis.',
-//
-//
+  //
+  //
   inputs: {
-//
+    //
     manager: {
       friendlyName: 'Manager',
       description: 'The connection manager instance to acquire the connection from.',
@@ -28,19 +28,19 @@ module.exports = {
       example: 10000,
       defaultsTo: 15000
     },
-//
+    //
     meta: {
       friendlyName: 'Meta (custom)',
       description: 'Additional stuff to pass to the driver.',
       extendedDescription: 'This is reserved for custom driver-specific extensions.  Please refer to the documentation for the driver you are using for more specific information.',
       example: '==='
     }
-//
+    //
   },
-//
-//
+  //
+  //
   exits: {
-//
+    //
     success: {
       description: 'A connection was successfully acquired.',
       extendedDescription: 'This connection should be eventually released.  Otherwise, it may time out.  '+
@@ -57,7 +57,7 @@ module.exports = {
         meta: '==='
       }
     },
-//
+    //
     failed: {
       description: 'Could not acquire a connection to the database using the specified manager.',
       extendedDescription: 'This might mean any of the following:\n' +
@@ -79,10 +79,10 @@ module.exports = {
         meta: '==='
       }
     }
-//
+    //
   },
-//
-//
+  //
+  //
   fn: function (inputs, exits){
     var _ = require('@sailshq/lodash');
     var redis = require('redis');
