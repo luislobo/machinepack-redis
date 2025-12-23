@@ -10,7 +10,10 @@ jobs:
   test:
     name: Test on Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
-    
+
+    permissions:
+      contents: read
+
     strategy:
       matrix:
         node-version: [18, 20, 22]
@@ -50,7 +53,10 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    
+
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
