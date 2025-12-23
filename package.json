@@ -1,7 +1,7 @@
 {
   "name": "machinepack-redis",
-  "version": "1.3.0",
-  "description": "Structured Node.js bindings for Redis.",
+  "version": "2.0.0",
+  "description": "Structured Node.js bindings for Redis with support for modern Redis features (v5 client, async/await, Sentinel, Cluster).",
   "scripts": {
     "test": "mocha tests/*.js --timeout 5000 --slow 2000",
     "coverage": "c8 mocha tests/*.js --timeout 5000 --slow 2000",
@@ -15,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/treelinehq/machinepack-redis.git"
+    "url": "git+https://github.com/luislobo/machinepack-redis.git"
   },
   "author": "The Sails Company",
   "contributors": [
